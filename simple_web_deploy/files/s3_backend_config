@@ -1,0 +1,4 @@
+bucket = "terraform-remote-state-for-simple-web"
+key = "simple-web-hosting-tfstate"
+region = "ap-southeast-2"
+profile = "terraform-user-profile"
