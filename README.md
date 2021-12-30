@@ -8,7 +8,7 @@ The diagram below provides an overview of the architecuture and some components 
 
 ![AWS Simple Web Architecture](./files/aws_simple_web.png)
 
-&nbsp;
+
 ## Requirements
 - aws account with right permissions
 - terraform installed locally as per [this tutorial](https://learn.hashicorp.com/tutorials/terraform/install-cli)
@@ -19,7 +19,7 @@ The diagram below provides an overview of the architecuture and some components 
 - the `tfvars` file for relevant environment has been reviewed and updated accordingly before running the modules
 - an account from https://keybase.io if using [pgp key encryption](https://www.linkedin.com/pulse/secret-management-w-key-base-terraform-easy-way-jrtlabs/) for terraform user access key
 
-&nbsp;
+
 ## Usage 
 
 ### Preparation
@@ -61,7 +61,6 @@ Before the actual deployment, we will prepare the environment with the [simple_w
   aws_secret_access_key = ....
   ```
 
-&nbsp;
 ### Deployment
 - initialise the [simple_web_deploy](./simple_web_deploy) module  with the S3 backend config file generated from the preveious module
 
@@ -88,44 +87,40 @@ Before the actual deployment, we will prepare the environment with the [simple_w
   ```
 The output lists out the public I of the bastion host and URL of the Loadbalancer for a quick look at **Simple Web**. Refresh the page can see different hostname of the 3 web servers behind the LB.
 
-&nbsp;
 ## Design considerations
 Some thoughts have been put into the development of this solution to address the following perspectives of this mini project.
 
-&nbsp;
 ### Security
 - A dedicated terraform user is created with restricted IAM policies so it won't interfere with other IAM users/roles, especially not with users with administrative permissions. By default the access key would be stored as plain text in the state file of the [simple_web_init](./simple_web_init) module. But the encryption capability has been embedded in the solution by making use of `pgp_key` created with [keybase](https://keybase.io) account
   - The IAM policies can be finetuned to have more granular control at individual operation
   - The storage and access to the key can be further improved by leveraging the capabilities provided by enterprise secrets management services such as [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/), or [Hashcorp Vault](https://www.vaultproject.io/)
   - Best practices for working with AWS IAM can be found at https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html
 
-&nbsp;
 - Although terraform [tls provider](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) provides utilities to generate TLS keys, the private key would be stored unencrypted in terraform state file which has potential security risk if not managed properly. Hence it is recommended to generate the SSH key outside of terraform as per the sample aws command mentioned in the requirements. 
   - Again secrets and encryption management systems can be employed to provide the protection as required by the business.
 
-&nbsp;
 - As recommended by the web hosting pratice, the web servers are kept within private subnets without direct access to the internet. Security group rules has been provisioned to allow only HTTP access from Loadbanlancer deployed in public subnet. An optional bastion host is provisioned for troubleshooting or manamagement access, of which the SSH access is only allowed from the public IP of your laptop.
   - to further secure the web server or any internet facing solutions, we can use SSL to encrypt the HTTP requests between end users and application load balancer
   - [AWS WAF](https://aws.amazon.com/waf/) and other format of firewalls are the enterprise level solutions to protect your web applications or APIs against common web exploits and bots that may affect availability, compromise security, or consume excessive resources.
 
-&nbsp;
+
 ### High Availability
 - By default, one instance of web server per availability zone is provisioned to provide high availablity of the **Simple Web** cluster, which is managed by the Auto Scaling Group. If the web service (port 80) is down, ASG would automatically bring up a new web server defind with Launch Template and terminate the one in trouble.
   - For production or enterprise deployment, more sophisticated health check rules should be considered and embedded into the health check rules to provide more robust and elastic HA architecture. 
 
-&nbsp;
+
 ### Modular design
 - the [simple_web_deploy](./simple_web_deploy) module uses two child modules to deploy the networking infrastrcture and ec2 instance separatly which provides better readability, maintainability, re-usability from code perspective
   - it can be further improved by adopting layered approach as recommended by [this article](https://skundunotes.com/2021/09/26/strengthen-security-posture-with-terraform-and-aws-iam-to-manage-aws-cloud-resources/) but need to find a balance with the project and team
 
-&nbsp;
+
 ## Improvements
 Here are a list of best wishes to make the solution works better and safer
 - to use AWS Secrets Manager or Hashicorp Vault to store and rotate the secrets 
 - to enforce server side encryption of remote state file on S3 bucket using KMS
 - to update web server nodes with more readable names by using a bit scripting in user-data
 
-&nbsp;
+
 ## Attributions
 Thanks to internet and open source community, the following sites or articles have provided tremendous help during the development of the **Simple Web**. A sincerely thank you from the bottom of my heart.
 - https://registry.terraform.io/providers/hashicorp/aws/latest/docs
