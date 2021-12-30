@@ -47,11 +47,11 @@ Before the actual deployment, we will prepare the environment with the [simple_w
 
 - retrieve the access key from output
   ```
-  terraform -chdir=simple_web_hosting_init output aws_secret_access_key
+  terraform -chdir=simple_web_init output aws_secret_access_key
   ```
 - optionally, if the encryption is enabled with pgp_key from keybase, decrypt the access key with following command
    ```
-   terraform -chdir=simple_web_hosting_init output -raw aws_secret_access_key_pgp_encrypted |base64 --decode |keybase pgp decrypt
+   terraform -chdir=simple_web_init output -raw aws_secret_access_key_pgp_encrypted |base64 --decode |keybase pgp decrypt
    ```
 
 - create an aws profile with the access id and key in the aws credentials file _~/.aws/credentials_ 
@@ -71,7 +71,7 @@ Before the actual deployment, we will prepare the environment with the [simple_w
 - optionally, create a new workspace named `dev` to differentiate with future production envnironment
 
   ```bash
-  terraform -chdir=simple_web_hosting workspace new dev
+  terraform -chdir=simple_web_deploy workspace new dev
   ```
 - deloy **Simple Web** with var file
 
